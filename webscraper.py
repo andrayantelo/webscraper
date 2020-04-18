@@ -11,12 +11,13 @@ tweet_arr = []
 
 for tweet in tweets:
     tweetObject = {
-            "author": tweet.find('h2', class_="author").text.encode('utf-8'),
-            "date": tweet.find('h5', class_="dateTime").text.encode('utf-8'),
-            "tweet": tweet.find('p', class_="content").text.encode('utf-8'),
-            "likes": tweet.find('p', class_="likes").text.encode('utf-8'),
-            "shares": tweet.find('p', class_="shares").text.encode('utf-8')
+            "author": tweet.find('h2', class_="author").text,
+            "date": tweet.find('h5', class_="dateTime").text,
+            "tweet": tweet.find('p', class_="content").text,
+            "likes": tweet.find('p', class_="likes").text,
+            "shares": tweet.find('p', class_="shares").text
             }
     tweet_arr.append(tweetObject)
+    data = json.dumps(tweet_arr) 
     with open('twitterData.json', 'w') as outfile:
-        json.dump(tweetArr, outfile)
+        outfile.write(data)
