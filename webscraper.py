@@ -1,11 +1,13 @@
 from bs4 import BeautifulSoup
 import requests
+import json
 
 url ='http://ethans_fake_twitter_site.surge.sh/'
 response = requests.get(url, timeout=5)
 soup = BeautifulSoup(response.content, "html.parser")
 
 tweets = soup.find_all('div', class_="tweetcontainer")
+tweet_arr = []
 
 for tweet in tweets:
     tweetObject = {
@@ -15,4 +17,6 @@ for tweet in tweets:
             "likes": tweet.find('p', class_="likes").text.encode('utf-8'),
             "shares": tweet.find('p', class_="shares").text.encode('utf-8')
             }
-    print(tweetObject)
+    tweet_arr.append(tweetObject)
+    with open('twitterData.json', 'w') as outfile:
+        json.dump(tweetArr, outfile)
