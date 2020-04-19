@@ -1,12 +1,41 @@
 from bs4 import BeautifulSoup
+from yaml import safe_load
 import requests
 import json
+import re
+import sys
 
-url = 'https://player.vimeo.com/external/402802566.hd.mp4?s=c87ed63d1f81d47cb9213107f1d5c1de0026ca40&profile_id=175&oauth2_token_id=1041102594'
-response = requests.get(url, timeout=5)
-soup = BeautifulSoup(response.content, "html.parser")
+pattern = re.compile("var jwPlaylists = \"(.*?)\";")
 
-videos = soup.find_all('script')
+with open('source.txt', 'r') as f:
+    urls = f.readlines()
 
-with open('video.json', 'w') as outfile:
-    outfile.write(videos)
+for url in urls:
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    scripts = soup.find_all('script')
+
+    script = [s for s in scripts if s.string and "jwPlaylists" in s.string]
+    script = script[0]
+
+    m = re.search("jwPlaylists = (.*?]);", script.string)
+    playlist = safe_load(m.group(1))
+
+    #best = max(videos[0], key=lambda f: f['height']*f['width'])
+
+    def get_best(p):
+        best = max(p, key=lambda f: f['height']*f['width'])
+        return best
+
+    # playlist = [ {'sources': [{},{}], 'image':'www.slkfjad.com', 'title': 'hello' }, ...]
+
+    videos = []
+    for p in playlist:
+        video = {}
+        video['title'] = p['title']
+        video['file'] = get_best(p['sources'])['file']
+        videos.append(video)
+
+    print(videos)
+    # [{'file': 'www.hello.com', 'title': 'art'}, {'file': 'www.world.com', 'title': 'art2'}]
